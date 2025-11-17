@@ -1,0 +1,209 @@
+### Cart API Tests with JWT Variable
+
+### 1. ✅ Спочатку залогінься для отримання JWT токена
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "chornookyiandry228@gmail.com",
+  "password": "1234567890"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get JWT token");
+}
+%}
+
+###
+
+### 2. ✅ Альтернативний логін (test user)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com", 
+  "password": "user123"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get JWT token");
+}
+%}
+
+###
+
+### 3. ✅ Отримати поточний кошик
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 4. ✅ Додати товар в кошик
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 50,
+  "quantity": 2
+}
+
+###
+
+### 5. ✅ Додати ще один товар
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 51,
+  "quantity": 1
+}
+
+###
+
+### 6. ✅ Додати третій товар
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 52,
+  "quantity": 3
+}
+
+###
+
+### 7. ✅ Додати той самий товар ще раз (має збільшити кількість)
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 50,
+  "quantity": 1
+}
+
+###
+
+### 8. ✅ Отримати кошик з товарами
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+> {%
+// Зберігаємо ID першого товару для подальших тестів
+if (response.body && response.body.items && response.body.items.length > 0) {
+    client.global.set("cart_item_id", response.body.items[0].id);
+    console.log("Cart item ID saved: " + response.body.items[0].id);
+}
+%}
+
+###
+
+### 9. ✅ Оновити кількість товару в кошику
+PUT http://localhost:8080/api/cart/{{cart_item_id}}
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "quantity": 5
+}
+
+###
+
+### 10. ✅ Отримати оновлений кошик
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+> {%
+// Зберігаємо ID другого товару для видалення
+if (response.body && response.body.items && response.body.items.length > 1) {
+    client.global.set("cart_item_id_to_delete", response.body.items[1].id);
+    console.log("Cart item to delete ID saved: " + response.body.items[1].id);
+}
+%}
+
+###
+
+### 13. ✅ Очистити весь кошик
+DELETE http://localhost:8080/api/cart/clear
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 14. ✅ Перевірити що кошик порожній
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### =================== ERROR CASES ===================
+
+### 15. ❌ Спробувати додати товар з неправильною кількістю (0)
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 1,
+  "quantity": 0
+}
+
+###
+
+### 16. ❌ Спробувати додати товар з від'ємною кількістю
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 1,
+  "quantity": -1
+}
+
+###
+
+### 17. ❌ Спробувати додати неіснуючий товар
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 999999,
+  "quantity": 1
+}
+
+###
+
+### 18. ❌ Спробувати додати більше товарів ніж є в наявності
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 1,
+  "quantity": 1000
+}
+
+###
+
+### 19. ❌ Спробувати оновити кількість неіснуючого товару в кошику
+PUT http://localhost:8080/api/cart/999999
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "quantity": 1
+}
+
+###

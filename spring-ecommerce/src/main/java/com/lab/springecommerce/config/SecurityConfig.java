@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/check").authenticated()
                         // PUBLIC - перегляд товарів доступний всім
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                        // PROTECTED - cart endpoints потребують авторизації
+                        .requestMatchers("/api/cart/**").authenticated()
                         // PUBLIC - seed endpoints (тільки для розробки!)
                         .requestMatchers("/api/admin/seed/**").permitAll()
                         // Усі інші запити потребують JWT токена

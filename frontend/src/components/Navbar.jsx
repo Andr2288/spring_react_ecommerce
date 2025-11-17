@@ -1,12 +1,25 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
-import { LogOut, ShoppingBag, User } from "lucide-react";
+import { useCartStore } from "../store/useCartStore.js";
+import { useEffect } from "react";
+import { LogOut, ShoppingBag, ShoppingCart, User } from "lucide-react";
 
 const Navbar = () => {
     const { authUser, logout } = useAuthStore();
+    const { totalItems, fetchCart, resetCart } = useCartStore();
     const location = useLocation();
 
+    // Завантажуємо кошик при авторизації
+    useEffect(() => {
+        if (authUser) {
+            fetchCart();
+        } else {
+            resetCart();
+        }
+    }, [authUser, fetchCart, resetCart]);
+
     const handleLogout = () => {
+        resetCart(); // Очищаємо кошик перед логаутом
         logout();
     };
 
@@ -25,6 +38,19 @@ const Navbar = () => {
                         {authUser ? (
                             // Authenticated user menu
                             <>
+                                {/* Cart Icon */}
+                                <Link
+                                    to="/cart"
+                                    className="relative p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                    <ShoppingCart className="h-6 w-6" />
+                                    {totalItems > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {totalItems > 99 ? '99+' : totalItems}
+                                        </span>
+                                    )}
+                                </Link>
+
                                 <div className="flex items-center space-x-2 text-gray-700">
                                     <User className="h-5 w-5" />
                                     <span className="text-sm font-medium">{authUser.name}</span>
