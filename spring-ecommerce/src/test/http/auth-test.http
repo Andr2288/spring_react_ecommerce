@@ -1,0 +1,105 @@
+### E-commerce Spring Boot API Tests
+
+### 1. ✅ SUCCESS - Реєстрація нового користувача
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "testuser",
+  "email": "test@example.com",
+  "phone": "+380501234567",
+  "password": "password123"
+}
+
+###
+
+### 2. ✅ SUCCESS - Реєстрація адміна (якщо ще не існує)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "admin",
+  "email": "admin@example.com",
+  "phone": "+380507654321",
+  "password": "admin123"
+}
+
+###
+
+### 3. ✅ SUCCESS - Логін користувача (повертає JWT токен)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+
+### 4. ✅ SUCCESS - Логін адміна (повертає JWT токен + isAdmin: true)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+###
+
+### 5. ❌ FAIL - Реєстрація з існуючим email (повинен повернути помилку)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "duplicate",
+  "email": "test@example.com",
+  "phone": "+380509999999",
+  "password": "password456"
+}
+
+###
+
+### 6. ❌ FAIL - Логін з неправильним паролем
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+### 7. ❌ FAIL - Логін з неіснуючим email
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "notexist@example.com",
+  "password": "password123"
+}
+
+###
+
+### 8. ❌ FAIL - Реєстрація з існуючим ім'ям користувача
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "testuser",
+  "email": "different@example.com",
+  "phone": "+380501111111",
+  "password": "password789"
+}
+
+###
+
+### Очікувані результати:
+### 1-4: Статус 200, JSON з token, name, email, isAdmin
+### 5-8: Статус 400 (Bad Request)
+### 
+### Зверни увагу на поле "isAdmin": 
+### - true для користувача з name="admin"
+### - false для всіх інших користувачів

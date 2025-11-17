@@ -1,0 +1,73 @@
+### Articles API Tests
+
+### 1. ✅ SUCCESS - Отримати всі товари (базовий запит)
+GET http://localhost:8080/api/articles
+Content-Type: application/json
+
+###
+
+### 2. ✅ SUCCESS - Отримати товари з пагінацією
+GET http://localhost:8080/api/articles?page=0&size=5
+Content-Type: application/json
+
+###
+
+### 3. ✅ SUCCESS - Пошук товарів по назві
+GET http://localhost:8080/api/articles?search=Red Bull
+Content-Type: application/json
+
+###
+
+### 4. ✅ SUCCESS - Фільтрація по ціні (мінімальна)
+GET http://localhost:8080/api/articles?minPrice=5.0
+Content-Type: application/json
+
+###
+
+### 5. ✅ SUCCESS - Фільтрація по ціні (максимальна)
+GET http://localhost:8080/api/articles?maxPrice=5.0
+Content-Type: application/json
+
+###
+
+### 6. ✅ SUCCESS - Фільтрація по ціні (діапазон)
+GET http://localhost:8080/api/articles?minPrice=2.0&maxPrice=8.0
+Content-Type: application/json
+
+###
+
+### 7. ✅ SUCCESS - Сортування по ціні (зростання)
+GET http://localhost:8080/api/articles?sortBy=price&sortDir=asc
+Content-Type: application/json
+
+###
+
+### 8. ✅ SUCCESS - Сортування по ціні (спадання)
+GET http://localhost:8080/api/articles?sortBy=price&sortDir=desc
+Content-Type: application/json
+
+###
+
+### 9. ✅ SUCCESS - Сортування по назві
+GET http://localhost:8080/api/articles?sortBy=name&sortDir=asc
+Content-Type: application/json
+
+###
+
+### 10. ✅ SUCCESS - Комбінований запит (пошук + фільтри + сортування + пагінація)
+GET http://localhost:8080/api/articles?search=T&minPrice=1.0&maxPrice=10.0&sortBy=price&sortDir=asc&page=0&size=3
+Content-Type: application/json
+
+###
+
+### 11. ✅ SUCCESS - Отримати конкретний товар по ID
+GET http://localhost:8080/api/articles/1
+Content-Type: application/json
+
+###
+
+### 12. ❌ FAIL - Отримати неіснуючий товар
+GET http://localhost:8080/api/articles/999
+Content-Type: application/json
+
+###

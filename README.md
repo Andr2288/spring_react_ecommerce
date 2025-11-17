@@ -1,0 +1,1 @@
+To run Spring project: ./mvnw.cmd spring-boot:run
