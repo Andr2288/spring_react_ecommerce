@@ -47,8 +47,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
-                        // PUBLIC - авторизація доступна всім
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // PUBLIC - реєстрація та логін доступні всім
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                        // PROTECTED - checkAuth потребує JWT токена
+                        .requestMatchers(HttpMethod.GET, "/api/auth/check").authenticated()
                         // PUBLIC - перегляд товарів доступний всім
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
                         // PUBLIC - seed endpoints (тільки для розробки!)
