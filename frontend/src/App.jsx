@@ -6,6 +6,7 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import BasketPage from "./pages/BasketPage.jsx";
+import CheckoutPage from "./pages/CheckoutPage.jsx";
 
 import {useAuthStore} from "./store/useAuthStore.js";
 import {useEffect} from "react";
@@ -53,6 +54,10 @@ const App = () => {
                 <Route
                     path="/cart"
                     element={authUser ? <BasketPage /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/checkout"
+                    element={authUser ? <CheckoutPage /> : <Navigate to="/login" />}
                 />
 
                 {/* Default redirects */}

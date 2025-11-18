@@ -1,0 +1,206 @@
+### Order API Tests
+
+### 1. ✅ Спочатку залогінься
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "user123"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get JWT token");
+}
+%}
+
+###
+
+### 2. ✅ Додай товари в кошик
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 50,
+  "quantity": 2
+}
+
+###
+
+### 3. ✅ Додай ще один товар
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 51,
+  "quantity": 1
+}
+
+###
+
+### 4. ✅ Перевір кошик перед замовленням
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 5. ✅ SUCCESS - Створити замовлення з валідними даними
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+> {%
+// Збереження order ID для подальших тестів
+if (response.body && response.body.orderId) {
+    client.global.set("order_id", response.body.orderId);
+    console.log("Order ID saved: " + response.body.orderId);
+}
+%}
+
+###
+
+### 6. ✅ Перевір що кошик очистився
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### =================== ERROR CASES ===================
+
+### 7. ❌ Спробувати створити замовлення з порожнім кошиком
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+###
+
+### 8. ❌ Неправильний номер картки (менше 16 цифр)
+# Додай товар в кошик знову
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 50,
+  "quantity": 1
+}
+
+###
+
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "123456781234567",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+###
+
+### 9. ❌ Неправильний формат expiration
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "1225",
+  "ccCvv": "123"
+}
+
+###
+
+### 10. ❌ Неправильний CVV
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "12"
+}
+
+###
+
+### 11. ❌ Відсутні обов'язкові поля
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+###
+
+### 12. ❌ Неправильний state (не 2 символи)
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York",
+  "deliveryState": "NEW YORK",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+###
