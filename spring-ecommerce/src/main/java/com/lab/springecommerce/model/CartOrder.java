@@ -4,7 +4,7 @@ package com.lab.springecommerce.model;
     @project   spring-ecommerce
     @class     CartOrder
     @version   1.0.0
-    @since     15.11.2025 - 00:48
+    @since     18.11.2025 - 17:02
 */
 
 import jakarta.persistence.*;
