@@ -9,6 +9,7 @@ package com.lab.springecommerce.service;
 
 import com.lab.springecommerce.dto.CreateOrderRequest;
 import com.lab.springecommerce.dto.CreateOrderResponse;
+import com.lab.springecommerce.dto.OrderHistoryResponse;
 import com.lab.springecommerce.model.Article;
 import com.lab.springecommerce.model.CartArticle;
 import com.lab.springecommerce.model.CartOrder;
@@ -18,12 +19,18 @@ import com.lab.springecommerce.repository.CartArticleRepository;
 import com.lab.springecommerce.repository.CartOrderRepository;
 import com.lab.springecommerce.repository.CustomerDeliveryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -106,60 +113,107 @@ public class OrderService {
                 "Order placed successfully",
                 totalPrice,
                 currency,
-                cartItems.stream().mapToInt(CartArticle::getQuantity).sum()
+                cartItems.size()
         );
+    }
+
+    public Page<OrderHistoryResponse> getMyOrders(String customerName, int page, int size,
+                                                  LocalDate startDate, LocalDate endDate, Long orderId) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Отримуємо замовлення з фільтрацією
+        Page<CartOrder> orders = cartOrderRepository.findByCustomerWithFilters(
+                customerName, startDate, endDate, orderId, pageable);
+
+        // Перетворюємо CartOrder в OrderHistoryResponse
+        return orders.map(order -> {
+            // Отримуємо товари замовлення
+            List<CartArticle> orderItems = cartArticleRepository.findByCartOrderId(order.getId());
+
+            // Конвертуємо товари в OrderItemInfo
+            List<OrderHistoryResponse.OrderItemInfo> items = orderItems.stream()
+                    .map(cartArticle -> {
+                        Article article = cartArticle.getArticle();
+                        BigDecimal itemTotal = article.getPrice().multiply(new BigDecimal(cartArticle.getQuantity()));
+
+                        return new OrderHistoryResponse.OrderItemInfo(
+                                article.getId(),
+                                article.getName(),
+                                article.getDescription(),
+                                article.getImageUrl(),
+                                article.getPrice(),
+                                article.getCurrency(),
+                                cartArticle.getQuantity(),
+                                itemTotal
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            // Конвертуємо дані доставки
+            CustomerDelivery delivery = order.getCustomerDelivery();
+            OrderHistoryResponse.OrderDeliveryInfo deliveryInfo = new OrderHistoryResponse.OrderDeliveryInfo(
+                    delivery.getDeliveryName(),
+                    delivery.getDeliveryStreet(),
+                    delivery.getDeliveryCity(),
+                    delivery.getDeliveryState(),
+                    delivery.getDeliveryZip()
+            );
+
+            // Рахуємо загальну кількість товарів
+            int totalItems = orderItems.stream()
+                    .mapToInt(CartArticle::getQuantity)
+                    .sum();
+
+            return new OrderHistoryResponse(
+                    order.getId(),
+                    order.getCreatedAt(),
+                    order.getTotalPrice(),
+                    order.getCurrency(),
+                    totalItems,
+                    "Completed", // статус завжди Completed для цього проекту
+                    deliveryInfo,
+                    items
+            );
+        });
     }
 
     private void validateOrderData(CreateOrderRequest request) {
         // Валідація даних доставки
-        if (isNullOrEmpty(request.getDeliveryName())) {
+        if (request.getDeliveryName() == null || request.getDeliveryName().trim().isEmpty()) {
             throw new RuntimeException("Delivery name is required");
         }
-        if (isNullOrEmpty(request.getDeliveryStreet())) {
+        if (request.getDeliveryStreet() == null || request.getDeliveryStreet().trim().isEmpty()) {
             throw new RuntimeException("Delivery street is required");
         }
-        if (isNullOrEmpty(request.getDeliveryCity())) {
+        if (request.getDeliveryCity() == null || request.getDeliveryCity().trim().isEmpty()) {
             throw new RuntimeException("Delivery city is required");
         }
-        if (isNullOrEmpty(request.getDeliveryState())) {
+        if (request.getDeliveryState() == null || request.getDeliveryState().trim().isEmpty()) {
             throw new RuntimeException("Delivery state is required");
         }
-        if (request.getDeliveryState().length() != 2) {
-            throw new RuntimeException("Delivery state must be 2 characters (e.g., CA, NY)");
-        }
-        if (isNullOrEmpty(request.getDeliveryZip())) {
-            throw new RuntimeException("Delivery ZIP is required");
-        }
-        if (request.getDeliveryZip().length() < 5 || request.getDeliveryZip().length() > 10) {
-            throw new RuntimeException("Invalid ZIP code format");
+        if (request.getDeliveryZip() == null || request.getDeliveryZip().trim().isEmpty()) {
+            throw new RuntimeException("Delivery zip is required");
         }
 
         // Валідація даних картки
-        if (isNullOrEmpty(request.getCcNumber())) {
-            throw new RuntimeException("Credit card number is required");
-        }
-        // Прибираємо пробіли та дефіси для валідації
-        String ccNumber = request.getCcNumber().replaceAll("[\\s-]", "");
-        if (ccNumber.length() != 16 || !ccNumber.matches("\\d{16}")) {
+        validateCreditCard(request.getCcNumber(), request.getCcExpiration(), request.getCcCvv());
+    }
+
+    private void validateCreditCard(String ccNumber, String ccExpiration, String ccCvv) {
+        // Валідація номеру картки (16 цифр)
+        if (ccNumber == null || !Pattern.matches("\\d{16}", ccNumber.replaceAll("\\s+", ""))) {
             throw new RuntimeException("Credit card number must be 16 digits");
         }
 
-        if (isNullOrEmpty(request.getCcExpiration())) {
-            throw new RuntimeException("Credit card expiration is required");
-        }
-        if (!Pattern.matches("^(0[1-9]|1[0-2])/\\d{2}$", request.getCcExpiration())) {
+        // Валідація терміну дії (MM/YY)
+        if (ccExpiration == null || !Pattern.matches("\\d{2}/\\d{2}", ccExpiration)) {
             throw new RuntimeException("Credit card expiration must be in MM/YY format");
         }
 
-        if (isNullOrEmpty(request.getCcCvv())) {
-            throw new RuntimeException("Credit card CVV is required");
-        }
-        if (request.getCcCvv().length() != 3 || !request.getCcCvv().matches("\\d{3}")) {
+        // Валідація CVV (3 цифри)
+        if (ccCvv == null || !Pattern.matches("\\d{3}", ccCvv)) {
             throw new RuntimeException("CVV must be 3 digits");
         }
-    }
-
-    private boolean isNullOrEmpty(String value) {
-        return value == null || value.trim().isEmpty();
     }
 }

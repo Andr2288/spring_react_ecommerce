@@ -28,4 +28,12 @@ public interface CartArticleRepository extends JpaRepository<CartArticle, Long> 
 
     // Видалити всі товари з кошика користувача
     void deleteByCustomerAndCartOrderIsNull(String customer);
+
+    // Знайти всі товари в конкретному замовленні
+    @Query("SELECT ca FROM CartArticle ca WHERE ca.cartOrder.id = :orderId ORDER BY ca.id")
+    List<CartArticle> findByCartOrderId(@Param("orderId") Long orderId);
+
+    // Знайти товари в замовленнях користувача
+    @Query("SELECT ca FROM CartArticle ca WHERE ca.cartOrder.id IN :orderIds ORDER BY ca.cartOrder.id, ca.id")
+    List<CartArticle> findByCartOrderIdIn(@Param("orderIds") List<Long> orderIds);
 }

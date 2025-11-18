@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
 import { useCartStore } from "../store/useCartStore.js";
 import { useEffect } from "react";
-import { LogOut, ShoppingBag, ShoppingCart, User } from "lucide-react";
+import { LogOut, ShoppingBag, ShoppingCart, User, Package } from "lucide-react";
 
 const Navbar = () => {
     const { authUser, logout } = useAuthStore();
@@ -38,6 +38,31 @@ const Navbar = () => {
                         {authUser ? (
                             // Authenticated user menu
                             <>
+                                {/* Navigation Links */}
+                                <div className="hidden md:flex items-center space-x-4">
+                                    <Link
+                                        to="/home"
+                                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                            location.pathname === "/home"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                        }`}
+                                    >
+                                        Products
+                                    </Link>
+                                    <Link
+                                        to="/orders"
+                                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                            location.pathname === "/orders"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                        }`}
+                                    >
+                                        <Package className="h-4 w-4 mr-1" />
+                                        Orders
+                                    </Link>
+                                </div>
+
                                 {/* Cart Icon */}
                                 <Link
                                     to="/cart"
@@ -46,51 +71,48 @@ const Navbar = () => {
                                     <ShoppingCart className="h-6 w-6" />
                                     {totalItems > 0 && (
                                         <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                            {totalItems > 99 ? '99+' : totalItems}
+                                            {totalItems > 99 ? "99+" : totalItems}
                                         </span>
                                     )}
                                 </Link>
 
-                                <div className="flex items-center space-x-2 text-gray-700">
-                                    <User className="h-5 w-5" />
-                                    <span className="text-sm font-medium">{authUser.name}</span>
-                                    {authUser.isAdmin && (
-                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                            Admin
+                                {/* User Menu */}
+                                <div className="flex items-center space-x-3">
+                                    <div className="flex items-center space-x-1">
+                                        <User className="h-5 w-5 text-gray-500" />
+                                        <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                                            {authUser.name}
                                         </span>
-                                    )}
-                                </div>
+                                        {authUser.isAdmin && (
+                                            <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                                Admin
+                                            </span>
+                                        )}
+                                    </div>
 
-                                <button
-                                    onClick={handleLogout}
-                                    className="inline-flex items-center space-x-1 text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                    <span>Logout</span>
-                                </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                                    >
+                                        <LogOut className="h-4 w-4 mr-1" />
+                                        Logout
+                                    </button>
+                                </div>
                             </>
                         ) : (
-                            // Guest user menu
-                            <div className="flex items-center space-x-4">
+                            // Unauthenticated user menu
+                            <div className="flex items-center space-x-2">
                                 <Link
                                     to="/login"
-                                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                        location.pathname === "/login"
-                                            ? "bg-blue-100 text-blue-700"
-                                            : "text-gray-500 hover:text-gray-700"
-                                    }`}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                                 >
                                     Login
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                        location.pathname === "/register"
-                                            ? "bg-blue-100 text-blue-700"
-                                            : "text-gray-500 hover:text-gray-700"
-                                    }`}
+                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                                 >
-                                    Register
+                                    Sign Up
                                 </Link>
                             </div>
                         )}
