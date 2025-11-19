@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { X, Save, Loader, Upload, AlertCircle } from "lucide-react";
+import { X, Save, Loader, AlertCircle } from "lucide-react";
 
-const ArticleForm = ({ 
-    isOpen, 
-    onClose, 
-    onSubmit, 
-    initialData = null, 
-    title = "Article Form",
-    mode = "create" 
-}) => {
+const ArticleForm = ({
+                         isOpen,
+                         onClose,
+                         onSubmit,
+                         initialData = null,
+                         title = "Article Form",
+                         mode = "create"
+                     }) => {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -17,10 +17,9 @@ const ArticleForm = ({
         currency: "USD",
         availableQuantity: ""
     });
-    
+
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [imagePreview, setImagePreview] = useState("");
 
     // Currency options
     const currencies = [
@@ -42,7 +41,6 @@ const ArticleForm = ({
                 currency: initialData.currency || "USD",
                 availableQuantity: initialData.availableQuantity ? initialData.availableQuantity.toString() : ""
             });
-            setImagePreview(initialData.imageUrl || "");
         } else {
             // Reset form for create mode
             setFormData({
@@ -53,7 +51,6 @@ const ArticleForm = ({
                 currency: "USD",
                 availableQuantity: ""
             });
-            setImagePreview("");
         }
         setErrors({});
     }, [mode, initialData, isOpen]);
@@ -71,11 +68,6 @@ const ArticleForm = ({
                 ...prev,
                 [name]: ""
             }));
-        }
-
-        // Update image preview when URL changes
-        if (name === "imageUrl") {
-            setImagePreview(value);
         }
     };
 
@@ -142,7 +134,7 @@ const ArticleForm = ({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -160,7 +152,7 @@ const ArticleForm = ({
             };
 
             await onSubmit(submitData);
-            
+
             // Form will be closed by parent component
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -181,13 +173,8 @@ const ArticleForm = ({
                 availableQuantity: ""
             });
             setErrors({});
-            setImagePreview("");
             onClose();
         }
-    };
-
-    const handleImageError = () => {
-        setImagePreview("");
     };
 
     if (!isOpen) return null;
@@ -195,9 +182,8 @@ const ArticleForm = ({
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-
                 {/* Modal */}
-                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                     {/* Header */}
                     <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div className="flex items-center justify-between mb-4">
@@ -207,37 +193,70 @@ const ArticleForm = ({
                             <button
                                 onClick={handleClose}
                                 disabled={isSubmitting}
-                                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
                             >
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
 
-                        {/* Form */}
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Name Field */}
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Product Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    maxLength={50}
-                                    className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.name ? 'border-red-300' : 'border-gray-300'
-                                    }`}
-                                    placeholder="Enter product name"
-                                />
-                                {errors.name && (
-                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                        <AlertCircle className="h-4 w-4 mr-1" />
-                                        {errors.name}
-                                    </p>
-                                )}
+                        <form className="space-y-4">
+                            {/* Name and Description Row */}
+                            <div className="grid grid-cols-2 gap-6">
+                                {/* Name Field */}
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Product Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        maxLength="50"
+                                        className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                            errors.name ? 'border-red-300' : 'border-gray-300'
+                                        }`}
+                                        placeholder="Enter product name"
+                                    />
+                                    <div className="mt-1 flex justify-between items-center">
+                                        {errors.name ? (
+                                            <p className="text-sm text-red-600 flex items-center">
+                                                <AlertCircle className="h-4 w-4 mr-1" />
+                                                {errors.name}
+                                            </p>
+                                        ) : (
+                                            <span></span>
+                                        )}
+                                        <span className="text-xs text-gray-500">
+                                            {formData.name.length}/50
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Image URL Field */}
+                                <div>
+                                    <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Image URL
+                                    </label>
+                                    <input
+                                        type="url"
+                                        id="imageUrl"
+                                        name="imageUrl"
+                                        value={formData.imageUrl}
+                                        onChange={handleInputChange}
+                                        className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                            errors.imageUrl ? 'border-red-300' : 'border-gray-300'
+                                        }`}
+                                        placeholder="https://example.com/image.jpg"
+                                    />
+                                    {errors.imageUrl && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center">
+                                            <AlertCircle className="h-4 w-4 mr-1" />
+                                            {errors.imageUrl}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Description Field */}
@@ -250,8 +269,8 @@ const ArticleForm = ({
                                     name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
-                                    maxLength={255}
-                                    rows={3}
+                                    rows="2"
+                                    maxLength="255"
                                     className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                                         errors.description ? 'border-red-300' : 'border-gray-300'
                                     }`}
@@ -272,47 +291,8 @@ const ArticleForm = ({
                                 </div>
                             </div>
 
-                            {/* Image URL Field */}
-                            <div>
-                                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Image URL
-                                </label>
-                                <input
-                                    type="url"
-                                    id="imageUrl"
-                                    name="imageUrl"
-                                    value={formData.imageUrl}
-                                    onChange={handleInputChange}
-                                    className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.imageUrl ? 'border-red-300' : 'border-gray-300'
-                                    }`}
-                                    placeholder="https://example.com/image.jpg"
-                                />
-                                {errors.imageUrl && (
-                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                        <AlertCircle className="h-4 w-4 mr-1" />
-                                        {errors.imageUrl}
-                                    </p>
-                                )}
-                                
-                                {/* Image Preview */}
-                                {imagePreview && (
-                                    <div className="mt-2">
-                                        <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
-                                        <div className="w-32 h-32 border border-gray-300 rounded-lg overflow-hidden">
-                                            <img
-                                                src={imagePreview}
-                                                alt="Preview"
-                                                className="w-full h-full object-cover"
-                                                onError={handleImageError}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Price and Currency Row */}
-                            <div className="grid grid-cols-2 gap-4">
+                            {/* Price, Currency and Quantity Row */}
+                            <div className="grid grid-cols-3 gap-4">
                                 {/* Price Field */}
                                 <div>
                                     <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,32 +347,32 @@ const ArticleForm = ({
                                         </p>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Quantity Field */}
-                            <div>
-                                <label htmlFor="availableQuantity" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Available Quantity <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    id="availableQuantity"
-                                    name="availableQuantity"
-                                    value={formData.availableQuantity}
-                                    onChange={handleInputChange}
-                                    min="0"
-                                    max="999999"
-                                    className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.availableQuantity ? 'border-red-300' : 'border-gray-300'
-                                    }`}
-                                    placeholder="0"
-                                />
-                                {errors.availableQuantity && (
-                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                        <AlertCircle className="h-4 w-4 mr-1" />
-                                        {errors.availableQuantity}
-                                    </p>
-                                )}
+                                {/* Quantity Field */}
+                                <div>
+                                    <label htmlFor="availableQuantity" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Available Quantity <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="availableQuantity"
+                                        name="availableQuantity"
+                                        value={formData.availableQuantity}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        max="999999"
+                                        className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                            errors.availableQuantity ? 'border-red-300' : 'border-gray-300'
+                                        }`}
+                                        placeholder="0"
+                                    />
+                                    {errors.availableQuantity && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center">
+                                            <AlertCircle className="h-4 w-4 mr-1" />
+                                            {errors.availableQuantity}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     </div>

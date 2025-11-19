@@ -3,8 +3,8 @@ package com.lab.springecommerce.config;
 /*
     @project   spring-ecommerce
     @class     SecurityConfig
-    @version   1.0.0
-    @since     15.11.2025 - 00:57
+    @version   1.0.1
+    @since     19.11.2025 - Fixed seed endpoints order
 */
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +53,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/check").authenticated()
                         // PUBLIC - перегляд товарів доступний всім
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                        // PUBLIC - seed endpoints (тільки для розробки!) - МАЄ БУТИ ПЕРЕД /api/admin/**
+                        .requestMatchers("/api/admin/seed/**").permitAll()
+                        // ADMIN ONLY - admin endpoints потребують авторизації (перевірка ролі в контролері)
+                        .requestMatchers("/api/admin/**").authenticated()
                         // PROTECTED - cart endpoints потребують авторизації
                         .requestMatchers("/api/cart/**").authenticated()
                         // PROTECTED - orders endpoints потребують авторизації
                         .requestMatchers("/api/orders/**").authenticated()
-                        // ADMIN ONLY - admin endpoints потребують авторизації (перевірка ролі в контролері)
-                        .requestMatchers("/api/admin/**").authenticated()
-                        // PUBLIC - seed endpoints (тільки для розробки!)
-                        .requestMatchers("/api/admin/seed/**").permitAll()
                         // Усі інші запити потребують JWT токена
                         .anyRequest().authenticated()
                 )
