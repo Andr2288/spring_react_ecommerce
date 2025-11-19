@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage.jsx";
 import BasketPage from "./pages/BasketPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrdersHistoryPage from "./pages/OrdersHistoryPage.jsx";
+import AdminArticlesPage from "./pages/AdminArticlesPage.jsx";
 
 import {useAuthStore} from "./store/useAuthStore.js";
 import {useEffect} from "react";
@@ -63,6 +64,18 @@ const App = () => {
                 <Route
                     path="/orders"
                     element={authUser ? <OrdersHistoryPage /> : <Navigate to="/login" />}
+                />
+
+                {/* Admin routes - redirect to login if not authenticated, to home if not admin */}
+                <Route
+                    path="/admin/articles"
+                    element={
+                        authUser
+                            ? authUser.isAdmin
+                                ? <AdminArticlesPage />
+                                : <Navigate to="/home" />
+                            : <Navigate to="/login" />
+                    }
                 />
 
                 {/* Default redirects */}

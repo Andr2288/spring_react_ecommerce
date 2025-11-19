@@ -111,7 +111,7 @@ public class ManualDataSeeder {
     private void createSampleArticles() {
         Article[] articles = {
                 new Article("Red Bull Racing T-Shirt", "Official Red Bull Racing team T-shirt, size XL", 
-                          "https://via.placeholder.com/300x300/1E40AF/FFFFFF?text=Red+Bull", 
+                          "https://www.google.com/imgres?q=image%20placeholder&imgurl=https%3A%2F%2Fpng.pngtree.com%2Fpng-vector%2F20210604%2Fourmid%2Fpngtree-gray-network-placeholder-png-image_3416659.jpg&imgrefurl=https%3A%2F%2Fpngtree.com%2Fso%2Fplaceholder&docid=770E5Aq-rUxNqM&tbnid=08Ipzp5Hqf3MtM&vet=12ahUKEwjdprr0kP6QAxViT1UIHdjFHpYQM3oECCAQAA..i&w=360&h=360&hcb=2&ved=2ahUKEwjdprr0kP6QAxViT1UIHdjFHpYQM3oECCAQAA",
                           new BigDecimal("29.99"), "USD", 15),
 
                 new Article("Mercedes-AMG Petronas T-Shirt", "Official Mercedes F1 team T-shirt, size L", 

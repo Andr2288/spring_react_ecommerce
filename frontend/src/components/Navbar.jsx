@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
 import { useCartStore } from "../store/useCartStore.js";
 import { useEffect } from "react";
-import { LogOut, ShoppingBag, ShoppingCart, User, Package } from "lucide-react";
+import { LogOut, ShoppingBag, ShoppingCart, User, Package, Shield } from "lucide-react";
 
 const Navbar = () => {
     const { authUser, logout } = useAuthStore();
@@ -19,6 +19,7 @@ const Navbar = () => {
     }, [authUser, fetchCart, resetCart]);
 
     const handleLogout = () => {
+
         resetCart(); // Очищаємо кошик перед логаутом
         logout();
     };
@@ -61,6 +62,21 @@ const Navbar = () => {
                                         <Package className="h-4 w-4 mr-1" />
                                         Orders
                                     </Link>
+
+                                    {/* Admin Navigation */}
+                                    {authUser.isAdmin && (
+                                        <Link
+                                            to="/admin/articles"
+                                            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                location.pathname === "/admin/articles"
+                                                    ? "bg-purple-100 text-purple-700"
+                                                    : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                            }`}
+                                        >
+                                            <Shield className="h-4 w-4 mr-1" />
+                                            Admin Panel
+                                        </Link>
+                                    )}
                                 </div>
 
                                 {/* Cart Icon */}
@@ -119,6 +135,46 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Navigation Menu - только для мобильных устройств */}
+            {authUser && (
+                <div className="md:hidden border-t border-gray-200 bg-gray-50">
+                    <div className="px-4 py-2 space-y-1">
+                        <Link
+                            to="/home"
+                            className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                location.pathname === "/home"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
+                        >
+                            Products
+                        </Link>
+                        <Link
+                            to="/orders"
+                            className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                location.pathname === "/orders"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
+                        >
+                            Orders
+                        </Link>
+                        {authUser.isAdmin && (
+                            <Link
+                                to="/admin/articles"
+                                className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    location.pathname === "/admin/articles"
+                                        ? "bg-purple-100 text-purple-700"
+                                        : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                }`}
+                            >
+                                Admin Panel
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
         </nav>
     );
 };
