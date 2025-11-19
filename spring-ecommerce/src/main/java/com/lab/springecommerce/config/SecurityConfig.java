@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/cart/**").authenticated()
                         // PROTECTED - orders endpoints потребують авторизації
                         .requestMatchers("/api/orders/**").authenticated()
+                        // ADMIN ONLY - admin endpoints потребують авторизації (перевірка ролі в контролері)
+                        .requestMatchers("/api/admin/**").authenticated()
                         // PUBLIC - seed endpoints (тільки для розробки!)
                         .requestMatchers("/api/admin/seed/**").permitAll()
                         // Усі інші запити потребують JWT токена

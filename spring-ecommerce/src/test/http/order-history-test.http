@@ -1,0 +1,261 @@
+### Order History API Tests
+
+### 1. ✅ Спочатку залогінься
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "user123"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get JWT token");
+}
+%}
+
+###
+
+### 2. ✅ Додай товари в кошик для тестування
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 50,
+  "quantity": 2
+}
+
+###
+
+### 3. ✅ Створи замовлення для тестування історії
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "John Doe",
+  "deliveryStreet": "123 Main St",
+  "deliveryCity": "New York", 
+  "deliveryState": "NY",
+  "deliveryZip": "10001",
+  "ccNumber": "1234567812345678",
+  "ccExpiration": "12/25",
+  "ccCvv": "123"
+}
+
+> {%
+// Збереження order ID для подальших тестів
+if (response.body && response.body.orderId) {
+    client.global.set("test_order_id", response.body.orderId);
+    console.log("Test Order ID saved: " + response.body.orderId);
+}
+%}
+
+###
+
+### 4. ✅ SUCCESS - Отримати всі замовлення користувача (базовий запит)
+GET http://localhost:8080/api/orders/my
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 5. ✅ SUCCESS - Отримати замовлення з пагінацією
+GET http://localhost:8080/api/orders/my?page=0&size=5
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 6. ✅ SUCCESS - Пошук замовлення по ID
+GET http://localhost:8080/api/orders/my?orderId={{test_order_id}}
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 7. ✅ SUCCESS - Фільтрація по даті (сьогодні)
+GET http://localhost:8080/api/orders/my?startDate=2024-11-18&endDate=2024-11-19
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 8. ✅ SUCCESS - Фільтрація по даті (останній тиждень)
+GET http://localhost:8080/api/orders/my?startDate=2024-11-12&endDate=2024-11-19
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 9. ✅ SUCCESS - Комбінований запит (дата + пагінація)
+GET http://localhost:8080/api/orders/my?startDate=2024-11-01&endDate=2024-12-01&page=0&size=10
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 10. ✅ SUCCESS - Комбінований запит (ID + дата + пагінація)
+GET http://localhost:8080/api/orders/my?orderId={{test_order_id}}&startDate=2024-11-18&page=0&size=5
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 11. ✅ SUCCESS - Отримати замовлення з великим page size
+GET http://localhost:8080/api/orders/my?page=0&size=20
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 12. ✅ SUCCESS - Отримати другу сторінку (якщо є достатньо замовлень)
+GET http://localhost:8080/api/orders/my?page=1&size=2
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### =================== EDGE CASES ===================
+
+### 13. ✅ Пошук неіснуючого замовлення
+GET http://localhost:8080/api/orders/my?orderId=999999
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 14. ✅ Фільтрація по даті в майбутньому (порожній результат)
+GET http://localhost:8080/api/orders/my?startDate=2025-01-01&endDate=2025-12-31
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 15. ✅ Фільтрація по даті в минулому (порожній результат)
+GET http://localhost:8080/api/orders/my?startDate=2020-01-01&endDate=2020-12-31
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 16. ✅ Некоректний формат дати (має повернути помилку)
+GET http://localhost:8080/api/orders/my?startDate=invalid-date&endDate=2024-12-31
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 17. ✅ Негативний page number (має повернути перший page або помилку)
+GET http://localhost:8080/api/orders/my?page=-1&size=10
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 18. ✅ Занадто великий page size (перевірка ліміту)
+GET http://localhost:8080/api/orders/my?page=0&size=1000
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### =================== AUTH ERROR CASES ===================
+
+### 19. ❌ Запит без авторизації (має повернути 401)
+GET http://localhost:8080/api/orders/my
+
+###
+
+### 20. ❌ Запит з неправильним токеном (має повернути 401)
+GET http://localhost:8080/api/orders/my
+Authorization: Bearer invalid.token.here
+
+###
+
+### =================== СТВОРИ БІЛЬШЕ ЗАМОВЛЕНЬ ДЛЯ КРАЩОГО ТЕСТУВАННЯ ===================
+
+### 21. ✅ Створи друге замовлення (додай товар + оформи)
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 51,
+  "quantity": 1
+}
+
+###
+
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "Jane Smith",
+  "deliveryStreet": "456 Oak Ave",
+  "deliveryCity": "Los Angeles",
+  "deliveryState": "CA", 
+  "deliveryZip": "90210",
+  "ccNumber": "9876543210987654",
+  "ccExpiration": "11/26",
+  "ccCvv": "456"
+}
+
+###
+
+### 22. ✅ Створи третє замовлення
+POST http://localhost:8080/api/cart
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "articleId": 52,
+  "quantity": 3
+}
+
+###
+
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "deliveryName": "Bob Wilson",
+  "deliveryStreet": "789 Pine Rd",
+  "deliveryCity": "Chicago",
+  "deliveryState": "IL",
+  "deliveryZip": "60601", 
+  "ccNumber": "5555444433332222",
+  "ccExpiration": "03/27",
+  "ccCvv": "789"
+}
+
+###
+
+### 23. ✅ Перевір усі замовлення після створення кількох
+GET http://localhost:8080/api/orders/my?page=0&size=10
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### 24. ✅ Тест пагінації з кількома замовленнями
+GET http://localhost:8080/api/orders/my?page=0&size=2
+Authorization: Bearer {{jwt_token}}
+
+###
+
+GET http://localhost:8080/api/orders/my?page=1&size=2
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### Очікувані результати:
+### 1-12, 21-25: Статус 200, JSON з orders array + pagination info
+### 13-15: Статус 200, порожній content array
+### 16: Статус 400 (Bad Request) - неправильний формат дати
+### 17-18: Статус 200 (Spring автоматично виправляє некоректні значення)
+### 19-20: Статус 401 (Unauthorized)
+
+### Структура відповіді:
+### {
+###   "content": [...], // масив OrderHistoryResponse
+###   "pageable": {...},
+###   "totalElements": number,
+###   "totalPages": number,
+###   "number": number, // поточна сторінка
+###   "size": number,
+###   "first": boolean,
+###   "last": boolean
+### }

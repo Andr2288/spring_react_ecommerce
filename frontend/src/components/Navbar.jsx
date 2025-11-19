@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
 import { useCartStore } from "../store/useCartStore.js";
 import { useEffect } from "react";
-import { LogOut, ShoppingBag, ShoppingCart, User, Package } from "lucide-react";
+import { LogOut, ShoppingBag, ShoppingCart, User, Package, Settings } from "lucide-react";
 
 const Navbar = () => {
     const { authUser, logout } = useAuthStore();
@@ -61,6 +61,21 @@ const Navbar = () => {
                                         <Package className="h-4 w-4 mr-1" />
                                         Orders
                                     </Link>
+
+                                    {/* Admin Navigation */}
+                                    {authUser.isAdmin && (
+                                        <Link
+                                            to="/admin/articles"
+                                            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                location.pathname === "/admin/articles"
+                                                    ? "bg-purple-100 text-purple-700"
+                                                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                            }`}
+                                        >
+                                            <Settings className="h-4 w-4 mr-1" />
+                                            Manage Products
+                                        </Link>
+                                    )}
                                 </div>
 
                                 {/* Cart Icon */}
