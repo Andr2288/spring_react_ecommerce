@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
 import { axiosInstance } from "../lib/axios.js";
 import OrderDetails from "../components/OrderDetails.jsx";
-import { 
-    Loader, 
-    Package, 
-    Calendar, 
-    Search, 
-    ChevronLeft, 
+import {
+    Loader,
+    Package,
+    ChevronLeft,
     ChevronRight,
     Eye,
     EyeOff
@@ -69,7 +67,7 @@ const OrdersHistoryPage = () => {
         } catch (error) {
             console.error("Failed to fetch orders:", error);
             setError("Failed to load order history. Please try again.");
-            
+
             if (error.response?.status === 401) {
                 toast.error("Please log in again");
                 navigate("/login");
@@ -81,24 +79,22 @@ const OrdersHistoryPage = () => {
         }
     }, [filters, pagination.pageSize, navigate]);
 
-    // Load orders on component mount
+    // Load orders on component mount and when filters change
     useEffect(() => {
         fetchOrders();
     }, [fetchOrders]);
 
-    // Filter change handlers
+    // Filter change handlers - auto apply filters with debounce
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({
             ...prev,
             [key]: value
         }));
-    };
-
-    const applyFilters = () => {
+        // Reset to first page when filters change
         setPagination(prev => ({ ...prev, currentPage: 0 }));
-        fetchOrders(0);
     };
 
+    // Reset filters
     const resetFilters = () => {
         setFilters({
             startDate: "",
@@ -106,7 +102,6 @@ const OrdersHistoryPage = () => {
             orderId: ""
         });
         setPagination(prev => ({ ...prev, currentPage: 0 }));
-        setTimeout(() => fetchOrders(0), 100);
     };
 
     // Pagination handlers
@@ -164,7 +159,7 @@ const OrdersHistoryPage = () => {
                 {/* Filters */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         {/* Start Date */}
                         <div>
@@ -209,15 +204,8 @@ const OrdersHistoryPage = () => {
                             />
                         </div>
 
-                        {/* Filter Actions */}
-                        <div className="flex items-end space-x-2">
-                            <button
-                                onClick={applyFilters}
-                                className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            >
-                                <Search className="h-4 w-4 mr-2" />
-                                Apply
-                            </button>
+                        {/* Reset Button only */}
+                        <div className="flex items-end">
                             <button
                                 onClick={resetFilters}
                                 className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -276,7 +264,7 @@ const OrdersHistoryPage = () => {
                                                 {order.status}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="text-right">
                                             <p className="text-lg font-bold text-gray-900">
                                                 {order.totalPrice} {order.currency}
@@ -332,7 +320,7 @@ const OrdersHistoryPage = () => {
                             )}{" "}
                             of {pagination.totalElements} orders
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => handlePageChange(pagination.currentPage - 1)}
@@ -347,7 +335,7 @@ const OrdersHistoryPage = () => {
                             {[...Array(pagination.totalPages)].map((_, index) => {
                                 const pageNum = index;
                                 const isCurrentPage = pageNum === pagination.currentPage;
-                                
+
                                 return (
                                     <button
                                         key={pageNum}

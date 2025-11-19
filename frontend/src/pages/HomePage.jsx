@@ -15,7 +15,7 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Pagination state
+
     const [pagination, setPagination] = useState({
         currentPage: 0,
         totalPages: 0,
@@ -23,7 +23,7 @@ const HomePage = () => {
         pageSize: 12
     });
 
-    // Filter state
+
     const [search, setSearch] = useState("");
     const [filters, setFilters] = useState({
         minPrice: null,
@@ -32,7 +32,7 @@ const HomePage = () => {
         sortDir: "asc"
     });
 
-    // Fetch articles with filters and pagination
+
     const fetchArticles = useCallback(async (page = 0) => {
         try {
             setLoading(true);
@@ -68,22 +68,22 @@ const HomePage = () => {
         }
     }, [search, filters, pagination.pageSize]);
 
-    // Initial load
+
     useEffect(() => {
         fetchArticles(0);
     }, [search, filters]);
 
-    // Handle search
+
     const handleSearch = useCallback((searchValue) => {
         setSearch(searchValue);
     }, []);
 
-    // Handle filters change
+
     const handleFiltersChange = useCallback((newFilters) => {
         setFilters(newFilters);
     }, []);
 
-    // Handle filters clear
+
     const handleFiltersClear = useCallback(() => {
         setFilters({
             minPrice: null,
@@ -94,7 +94,7 @@ const HomePage = () => {
         setSearch("");
     }, []);
 
-    // Handle page change
+
     const handlePageChange = useCallback((page) => {
         fetchArticles(page);
         window.scrollTo({ top: 0, behavior: 'smooth' });
