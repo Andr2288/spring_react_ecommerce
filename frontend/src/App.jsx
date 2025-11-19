@@ -9,6 +9,7 @@ import BasketPage from "./pages/BasketPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrdersHistoryPage from "./pages/OrdersHistoryPage.jsx";
 import AdminArticlesPage from "./pages/AdminArticlesPage.jsx";
+import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
 
 import {useAuthStore} from "./store/useAuthStore.js";
 import {useEffect} from "react";
@@ -73,6 +74,17 @@ const App = () => {
                         authUser
                             ? authUser.isAdmin
                                 ? <AdminArticlesPage />
+                                : <Navigate to="/home" />
+                            : <Navigate to="/login" />
+                    }
+                />
+
+                <Route
+                    path="/admin/orders"
+                    element={
+                        authUser
+                            ? authUser.isAdmin
+                                ? <AdminOrdersPage />
                                 : <Navigate to="/home" />
                             : <Navigate to="/login" />
                     }

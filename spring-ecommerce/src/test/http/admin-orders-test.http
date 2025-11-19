@@ -1,0 +1,150 @@
+### Admin Orders API Tests - Sprint 7
+
+### 1. ✅ Спочатку залогінься як admin
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("admin_token", response.body.token);
+    console.log("Admin JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get admin JWT token");
+}
+%}
+
+###
+
+### 2. ✅ Отримати всі замовлення без фільтрів
+GET http://localhost:8080/api/admin/orders
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 3. ✅ Отримати замовлення з пагінацією
+GET http://localhost:8080/api/admin/orders?page=0&size=5&sortBy=createdAt&sortDir=desc
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 4. ✅ Фільтр по імені клієнта
+GET http://localhost:8080/api/admin/orders?customerName=testuser
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 5. ✅ Фільтр по даті (останній місяць)
+GET http://localhost:8080/api/admin/orders?startDate=2024-10-01&endDate=2024-12-31
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 6. ✅ Пошук по ID замовлення
+GET http://localhost:8080/api/admin/orders?orderId=1
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 7. ✅ Комбінований фільтр (клієнт + дати)
+GET http://localhost:8080/api/admin/orders?customerName=test&startDate=2024-11-01&endDate=2024-11-30&sortBy=totalPrice&sortDir=desc
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 8. ✅ Отримати конкретне замовлення по ID
+GET http://localhost:8080/api/admin/orders/9
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 9. ✅ Отримати статистику замовлень
+GET http://localhost:8080/api/admin/orders/stats
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 10. ✅ Отримати список клієнтів
+GET http://localhost:8080/api/admin/orders/customers
+Authorization: Bearer {{admin_token}}
+
+###
+
+### =================== ERROR CASES ===================
+
+### 11. ❌ Спробувати залогінитись як звичайний користувач
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "user123"
+}
+
+> {%
+// Збереження JWT токена звичайного користувача
+if (response.body && response.body.token) {
+    client.global.set("user_token", response.body.token);
+    console.log("User JWT token saved: " + response.body.token);
+}
+%}
+
+###
+
+### 12. ❌ Спробувати отримати замовлення як звичайний користувач (403 Forbidden)
+GET http://localhost:8080/api/admin/orders
+Authorization: Bearer {{user_token}}
+
+###
+
+### 13. ❌ Спробувати отримати замовлення без токена (401 Unauthorized)
+GET http://localhost:8080/api/admin/orders
+
+###
+
+### 14. ❌ Неіснуюче замовлення
+GET http://localhost:8080/api/admin/orders/999999
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 15. ❌ Невірні параметри дати
+GET http://localhost:8080/api/admin/orders?startDate=invalid-date&endDate=2024-12-31
+Authorization: Bearer {{admin_token}}
+
+###
+
+### =================== ДОДАТКОВІ ТЕСТИ ===================
+
+### 16. ✅ Сортування по різних полях
+GET http://localhost:8080/api/admin/orders?sortBy=totalPrice&sortDir=asc
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 17. ✅ Великий розмір сторінки
+GET http://localhost:8080/api/admin/orders?page=0&size=50
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 18. ✅ Фільтр по частині імені клієнта
+GET http://localhost:8080/api/admin/orders?customerName=te
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 19. ✅ Тільки сьогоднішні замовлення
+GET http://localhost:8080/api/admin/orders?startDate=2024-11-19&endDate=2024-11-19
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 20. ✅ Сортування по ID замовлення
+GET http://localhost:8080/api/admin/orders?sortBy=id&sortDir=desc&page=0&size=10
+Authorization: Bearer {{admin_token}}
