@@ -41,6 +41,7 @@ public class ProfileController {
             @RequestBody ProfileUpdateRequest request) {
 
         String customerName = authentication.getName();
+        // Помилки буде обробляти GlobalExceptionHandler
         ProfileResponse updatedProfile = profileService.updateProfile(customerName, request);
         return ResponseEntity.ok(updatedProfile);
     }
@@ -51,6 +52,7 @@ public class ProfileController {
             @RequestBody ChangePasswordRequest request) {
 
         String customerName = authentication.getName();
+        // Помилки буде обробляти GlobalExceptionHandler
         profileService.changePassword(customerName, request);
 
         Map<String, String> response = new HashMap<>();
@@ -75,6 +77,12 @@ public class ProfileController {
         } catch (IOException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to upload file: " + e.getMessage());
+            errorResponse.put("message", "Failed to upload file: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
