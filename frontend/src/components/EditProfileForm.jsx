@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, User, Mail, Phone, Loader } from "lucide-react";
+import { X, User, Mail, Phone, Loader, Lock } from "lucide-react";
 
 const EditProfileForm = ({ isOpen, onClose, onSubmit, initialData }) => {
     const [formData, setFormData] = useState({
@@ -23,15 +23,6 @@ const EditProfileForm = ({ isOpen, onClose, onSubmit, initialData }) => {
 
     const validateForm = () => {
         const newErrors = {};
-
-        // Name validation
-        if (!formData.name.trim()) {
-            newErrors.name = "Name is required";
-        } else if (formData.name.trim().length < 2) {
-            newErrors.name = "Name must be at least 2 characters";
-        } else if (formData.name.trim().length > 50) {
-            newErrors.name = "Name must be at most 50 characters";
-        }
 
         // Email validation
         if (!formData.email.trim()) {
@@ -120,35 +111,34 @@ const EditProfileForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                     )}
 
                     <div className="space-y-4">
-                        {/* Name */}
+                        {/* Username (Read-only) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name *
+                                Username
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-gray-400" />
                                 </div>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <Lock className="h-4 w-4 text-gray-400" />
+                                </div>
                                 <input
                                     type="text"
-                                    name="name"
                                     value={formData.name}
-                                    onChange={handleInputChange}
-                                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                                        errors.name ? 'border-red-300' : 'border-gray-300'
-                                    }`}
-                                    placeholder="Enter your full name"
+                                    readOnly
+                                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
                                 />
                             </div>
-                            {errors.name && (
-                                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                                Username cannot be changed for security reasons
+                            </p>
                         </div>
 
                         {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address *
+                                Email *
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -162,11 +152,11 @@ const EditProfileForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                                         errors.email ? 'border-red-300' : 'border-gray-300'
                                     }`}
-                                    placeholder="Enter your email address"
+                                    placeholder="Enter your email"
                                 />
                             </div>
                             {errors.email && (
-                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                <p className="text-sm text-red-600 mt-1">{errors.email}</p>
                             )}
                         </div>
 
@@ -187,40 +177,32 @@ const EditProfileForm = ({ isOpen, onClose, onSubmit, initialData }) => {
                                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                                         errors.phone ? 'border-red-300' : 'border-gray-300'
                                     }`}
-                                    placeholder="Enter your phone number"
+                                    placeholder="+380501234567"
                                 />
                             </div>
                             {errors.phone && (
-                                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                                <p className="text-sm text-red-600 mt-1">{errors.phone}</p>
                             )}
-                            <p className="mt-1 text-sm text-gray-500">
-                                Optional. Format: +380501234567
-                            </p>
                         </div>
                     </div>
 
-                    {/* Form Actions */}
-                    <div className="flex space-x-3 mt-6 pt-6 border-t">
+                    {/* Footer */}
+                    <div className="flex justify-end space-x-3 pt-6 border-t mt-6">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            disabled={isSubmitting}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
                         >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader className="animate-spin h-4 w-4" />
-                                    <span>Saving...</span>
-                                </>
-                            ) : (
-                                <span>Save Changes</span>
-                            )}
+                            {isSubmitting && <Loader className="animate-spin -ml-1 mr-2 h-4 w-4" />}
+                            {isSubmitting ? 'Updating...' : 'Update Profile'}
                         </button>
                     </div>
                 </form>

@@ -7,12 +7,13 @@ package com.lab.springecommerce.service;
     @since     20.11.2025 - 16:33
 */
 
-import com.lab.springecommerce.dto.ChangePasswordRequest;
-import com.lab.springecommerce.dto.ProfileResponse;
 import com.lab.springecommerce.dto.ProfileUpdateRequest;
+import com.lab.springecommerce.dto.ProfileResponse;
+import com.lab.springecommerce.dto.ChangePasswordRequest;
 import com.lab.springecommerce.model.Customer;
 import com.lab.springecommerce.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,13 +36,15 @@ public class ProfileService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final String uploadDir = "uploads/avatars/";
+    @Value("${app.upload.dir:uploads/avatars}")
+    private String uploadDir;
 
     // Email pattern для валідації
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$"
     );
 
+    @Transactional(readOnly = true)
     public ProfileResponse getProfile(String customerName) {
         Customer customer = customerRepository.findById(customerName)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -63,19 +66,17 @@ public class ProfileService {
         // Валідація запиту
         validateProfileUpdateRequest(request);
 
-        // Перевіряємо унікальність email (якщо змінюється)
-        if (!customer.getEmail().equals(request.getEmail())) {
-            if (customerRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Email already exists");
+        // Перевіряємо, чи email не зайнятий іншим користувачем
+        if (!customer.getEmail().equals(request.getEmail().trim())) {
+            if (customerRepository.existsByEmail(request.getEmail().trim())) {
+                throw new RuntimeException("Email is already taken");
             }
         }
 
-        // Оновлюємо дані
-        customer.setEmail(request.getEmail());
-        customer.setPhone(request.getPhone());
-
-        // Ім'я не можна змінювати, бо це Primary Key
-        // customer.setName(request.getName());
+        // Оновлюємо тільки email та phone
+        // Ім'я НЕ змінюємо, бо це Primary Key
+        customer.setEmail(request.getEmail().trim());
+        customer.setPhone(request.getPhone() != null ? request.getPhone().trim() : null);
 
         customerRepository.save(customer);
 
@@ -144,18 +145,10 @@ public class ProfileService {
         return imageUrl;
     }
 
-    // Валідація ProfileUpdateRequest
+    // Валідація ProfileUpdateRequest (без перевірки name)
     private void validateProfileUpdateRequest(ProfileUpdateRequest request) {
         if (request == null) {
             throw new RuntimeException("Request cannot be null");
-        }
-
-        // Валідація name
-        if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new RuntimeException("Name is required");
-        }
-        if (request.getName().trim().length() > 50) {
-            throw new RuntimeException("Name must be at most 50 characters");
         }
 
         // Валідація email
