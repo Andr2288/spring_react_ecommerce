@@ -53,7 +53,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/auth/check").authenticated()
                         // PUBLIC - перегляд товарів доступний всім
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
-                        // PUBLIC - seed endpoints (тільки для розробки!) - МАЄ БУТИ ПЕРЕД /api/admin/**
+                        // PUBLIC - статичні файли (аватари) доступні всім
+                        .requestMatchers(HttpMethod.GET, "/uploads/avatars/**").permitAll()
+                        // PUBLIC - seed endpoints (тільки для розробки!)
+                        // МАЄ БУТИ ПЕРЕД /api/admin/**
                         .requestMatchers("/api/admin/seed/**").permitAll()
                         // ADMIN ONLY - admin endpoints потребують авторизації (перевірка ролі в контролері)
                         .requestMatchers("/api/admin/**").authenticated()
@@ -61,6 +64,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/cart/**").authenticated()
                         // PROTECTED - orders endpoints потребують авторизації
                         .requestMatchers("/api/orders/**").authenticated()
+                        // PROTECTED - profile endpoints потребують авторизації
+                        .requestMatchers("/api/profile/**").authenticated()
                         // Усі інші запити потребують JWT токена
                         .anyRequest().authenticated()
                 )

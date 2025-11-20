@@ -27,8 +27,11 @@ public class Customer {
     @Column(name = "email", length = 255)
     private String email;
 
-    @Column(name = "password", length = 255, nullable = false)  // Збільшено з 50 до 255
+    @Column(name = "password", length = 255, nullable = false)
     private String password;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     public Customer() {
         this.createdAt = LocalDateTime.now();
@@ -80,5 +83,13 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

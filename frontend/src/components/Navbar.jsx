@@ -13,7 +13,8 @@ import {
     Shield,
     FileText,
     Users,
-    ChevronDown
+    ChevronDown,
+    Settings
 } from "lucide-react";
 
 const Navbar = () => {
@@ -23,16 +24,19 @@ const Navbar = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
         setIsMenuOpen(false);
         setIsAdminDropdownOpen(false);
+        setIsUserDropdownOpen(false);
     };
 
     const closeMenus = () => {
         setIsMenuOpen(false);
         setIsAdminDropdownOpen(false);
+        setIsUserDropdownOpen(false);
     };
 
     if (!authUser) return null;
@@ -91,67 +95,67 @@ const Navbar = () => {
                                         }`}
                                     >
                                         <Shield className="h-4 w-4 mr-1" />
-                                        Admin Panel
-                                        <ChevronDown className={`h-4 w-4 ml-1 transition-transform ${isAdminDropdownOpen ? 'rotate-180' : ''}`} />
+                                        Admin
+                                        <ChevronDown className="h-4 w-4 ml-1" />
                                     </button>
 
-                                    {/* Admin Dropdown Menu */}
                                     {isAdminDropdownOpen && (
-                                        <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                                            <div className="py-1">
-                                                <Link
-                                                    to="/admin/articles"
-                                                    onClick={() => setIsAdminDropdownOpen(false)}
-                                                    className={`flex items-center px-4 py-2 text-sm transition-colors ${
-                                                        location.pathname === "/admin/articles"
-                                                            ? "bg-purple-50 text-purple-700"
-                                                            : "text-gray-700 hover:bg-gray-50"
-                                                    }`}
-                                                >
-                                                    <FileText className="h-4 w-4 mr-3" />
-                                                    Manage Articles
-                                                </Link>
-                                                <Link
-                                                    to="/admin/orders"
-                                                    onClick={() => setIsAdminDropdownOpen(false)}
-                                                    className={`flex items-center px-4 py-2 text-sm transition-colors ${
-                                                        location.pathname === "/admin/orders"
-                                                            ? "bg-purple-50 text-purple-700"
-                                                            : "text-gray-700 hover:bg-gray-50"
-                                                    }`}
-                                                >
-                                                    <Users className="h-4 w-4 mr-3" />
-                                                    View Orders
-                                                </Link>
-                                            </div>
+                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+                                            <Link
+                                                to="/admin/articles"
+                                                onClick={closeMenus}
+                                                className={`block px-4 py-2 text-sm transition-colors ${
+                                                    location.pathname === "/admin/articles"
+                                                        ? "bg-purple-100 text-purple-700"
+                                                        : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                                }`}
+                                            >
+                                                <FileText className="h-4 w-4 inline mr-2" />
+                                                Manage Articles
+                                            </Link>
+                                            <Link
+                                                to="/admin/orders"
+                                                onClick={closeMenus}
+                                                className={`block px-4 py-2 text-sm transition-colors ${
+                                                    location.pathname === "/admin/orders"
+                                                        ? "bg-purple-100 text-purple-700"
+                                                        : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                                }`}
+                                            >
+                                                <Users className="h-4 w-4 inline mr-2" />
+                                                View Orders
+                                            </Link>
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
 
-                        {/* Cart & User Actions */}
-                        <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-gray-200">
-                            {/* Cart Icon */}
+                        {/* Cart & User Menu */}
+                        <div className="flex items-center space-x-3">
+                            {/* Shopping Cart */}
                             <Link
                                 to="/cart"
-                                className="relative p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                             >
                                 <ShoppingCart className="h-6 w-6" />
                                 {totalItems > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                                         {totalItems > 99 ? "99+" : totalItems}
                                     </span>
                                 )}
                             </Link>
 
-                            {/* User Menu */}
-                            <div className="flex items-center space-x-3">
-                                <div className="flex items-center">
-                                    <div className="bg-gray-200 p-2 rounded-full mr-2">
+                            {/* User Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                    className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                >
+                                    <div className="bg-gray-200 p-1.5 rounded-full">
                                         <User className="h-4 w-4 text-gray-600" />
                                     </div>
-                                    <div>
+                                    <div className="text-left">
                                         <div className="text-sm font-medium text-gray-900">
                                             {authUser.name}
                                         </div>
@@ -161,15 +165,33 @@ const Navbar = () => {
                                             </div>
                                         )}
                                     </div>
-                                </div>
-
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                                >
-                                    <LogOut className="h-4 w-4 mr-1" />
-                                    Logout
+                                    <ChevronDown className="h-4 w-4 text-gray-500" />
                                 </button>
+
+                                {isUserDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+                                        <Link
+                                            to="/profile"
+                                            onClick={closeMenus}
+                                            className={`flex items-center px-4 py-2 text-sm transition-colors ${
+                                                location.pathname === "/profile"
+                                                    ? "bg-blue-100 text-blue-700"
+                                                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                                            }`}
+                                        >
+                                            <Settings className="h-4 w-4 mr-2" />
+                                            My Profile
+                                        </Link>
+                                        <hr className="border-gray-200" />
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                        >
+                                            <LogOut className="h-4 w-4 mr-2" />
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -203,22 +225,6 @@ const Navbar = () => {
                             </Link>
 
                             <Link
-                                to="/cart"
-                                onClick={closeMenus}
-                                className="flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                            >
-                                <div className="flex items-center">
-                                    <ShoppingCart className="h-5 w-5 mr-3" />
-                                    Cart
-                                </div>
-                                {totalItems > 0 && (
-                                    <span className="bg-blue-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                                        {totalItems > 99 ? "99+" : totalItems}
-                                    </span>
-                                )}
-                            </Link>
-
-                            <Link
                                 to="/orders"
                                 onClick={closeMenus}
                                 className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
@@ -231,15 +237,45 @@ const Navbar = () => {
                                 Orders
                             </Link>
 
-                            {/* Admin Menu - Mobile */}
+                            <Link
+                                to="/cart"
+                                onClick={closeMenus}
+                                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                                    location.pathname === "/cart"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                }`}
+                            >
+                                <ShoppingCart className="h-5 w-5 mr-3" />
+                                Cart
+                                {totalItems > 0 && (
+                                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                        {totalItems > 99 ? "99+" : totalItems}
+                                    </span>
+                                )}
+                            </Link>
+
+                            <Link
+                                to="/profile"
+                                onClick={closeMenus}
+                                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                                    location.pathname === "/profile"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                }`}
+                            >
+                                <Settings className="h-5 w-5 mr-3" />
+                                My Profile
+                            </Link>
+
+                            {/* Admin Section - Mobile */}
                             {authUser.isAdmin && (
                                 <>
                                     <div className="border-t border-gray-200 pt-3 mt-3">
-                                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                        <div className="px-3 py-2 text-xs font-semibold text-purple-600 uppercase tracking-wider">
                                             Admin Panel
                                         </div>
                                     </div>
-
                                     <Link
                                         to="/admin/articles"
                                         onClick={closeMenus}
@@ -302,11 +338,14 @@ const Navbar = () => {
                 )}
             </div>
 
-            {/* Close dropdown when clicking outside */}
-            {isAdminDropdownOpen && (
+            {/* Close dropdowns when clicking outside */}
+            {(isAdminDropdownOpen || isUserDropdownOpen) && (
                 <div
                     className="fixed inset-0 z-40"
-                    onClick={() => setIsAdminDropdownOpen(false)}
+                    onClick={() => {
+                        setIsAdminDropdownOpen(false);
+                        setIsUserDropdownOpen(false);
+                    }}
                 ></div>
             )}
         </nav>

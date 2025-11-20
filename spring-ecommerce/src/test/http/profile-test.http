@@ -1,0 +1,183 @@
+### Profile API Tests - Sprint 8
+
+### 1. ✅ Спочатку залогінься як звичайний користувач
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "user123"
+}
+
+> {%
+// Збереження JWT токена у змінну
+if (response.body && response.body.token) {
+    client.global.set("user_token", response.body.token);
+    console.log("User JWT token saved: " + response.body.token);
+} else {
+    console.log("Failed to get user JWT token");
+}
+%}
+
+###
+
+### 2. ✅ Отримати дані профілю
+GET http://localhost:8080/api/profile
+Authorization: Bearer {{user_token}}
+
+###
+
+### 3. ✅ Оновити профіль (email, phone)
+PUT http://localhost:8080/api/profile
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+{
+  "name": "testuser",
+  "email": "test@example.com",
+  "phone": "+380501234567"
+}
+
+###
+
+### 4. ✅ Змінити пароль
+PUT http://localhost:8080/api/profile/password
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "user123",
+  "newPassword": "newuser123"
+}
+
+###
+
+### 5. ✅ Залогінься з новим паролем
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "newuser123"
+}
+
+> {%
+// Збереження JWT токена з новим паролем
+if (response.body && response.body.token) {
+    client.global.set("user_token_new", response.body.token);
+    console.log("User JWT token with new password saved");
+}
+%}
+
+###
+
+### 6. ✅ Тестування завантаження аватара (потрібен мультипарт файл)
+# POST http://localhost:8080/api/profile/image
+# Authorization: Bearer {{user_token_new}}
+# Content-Type: multipart/form-data; boundary=WebAppBoundary
+# 
+# --WebAppBoundary
+# Content-Disposition: form-data; name="file"; filename="avatar.jpg"
+# Content-Type: image/jpeg
+# 
+# < /path/to/test/image.jpg
+# --WebAppBoundary--
+
+### ПРИМІТКА: Для тестування завантаження файлу використовуйте Postman або curl
+### curl -X POST http://localhost:8080/api/profile/image \
+###   -H "Authorization: Bearer YOUR_TOKEN" \
+###   -F "file=@avatar.jpg"
+
+###
+
+### =================== ERROR CASES ===================
+
+### 7. ❌ Спробувати отримати профіль без токена (401 Unauthorized)
+GET http://localhost:8080/api/profile
+
+###
+
+### 8. ❌ Оновити профіль з невалідними даними
+PUT http://localhost:8080/api/profile
+Authorization: Bearer {{user_token_new}}
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "invalid-email",
+  "phone": ""
+}
+
+###
+
+### 9. ❌ Змінити пароль з невірним поточним паролем
+PUT http://localhost:8080/api/profile/password
+Authorization: Bearer {{user_token_new}}
+Content-Type: application/json
+
+{
+  "currentPassword": "wrongpassword",
+  "newPassword": "anothernew123"
+}
+
+###
+
+### 10. ❌ Змінити пароль з занадто коротким новим паролем
+PUT http://localhost:8080/api/profile/password
+Authorization: Bearer {{user_token_new}}
+Content-Type: application/json
+
+{
+  "currentPassword": "newuser123",
+  "newPassword": "123"
+}
+
+###
+
+### 11. ✅ Повернути пароль назад для подальших тестів
+PUT http://localhost:8080/api/profile/password
+Authorization: Bearer {{user_token_new}}
+Content-Type: application/json
+
+{
+  "currentPassword": "newuser123",
+  "newPassword": "user123"
+}
+
+###
+
+### 12. ✅ Тестування з адміном
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+> {%
+// Збереження JWT токена адміна
+if (response.body && response.body.token) {
+    client.global.set("admin_token", response.body.token);
+    console.log("Admin JWT token saved");
+}
+%}
+
+###
+
+### 13. ✅ Отримати профіль адміна
+GET http://localhost:8080/api/profile
+Authorization: Bearer {{admin_token}}
+
+###
+
+### 14. ✅ Оновити профіль адміна
+PUT http://localhost:8080/api/profile
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "name": "admin",
+  "email": "admin@example.com",
+  "phone": "+380501234567"
+}

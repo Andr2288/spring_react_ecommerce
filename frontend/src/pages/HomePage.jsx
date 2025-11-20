@@ -141,11 +141,6 @@ const HomePage = () => {
                             </p>
                         </div>
                         <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-                            {authUser?.isAdmin && (
-                                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                                    🔑 Admin Access
-                                </span>
-                            )}
                             <button
                                 onClick={handleLogout}
                                 className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-300 rounded-md hover:bg-red-100 transition-colors"

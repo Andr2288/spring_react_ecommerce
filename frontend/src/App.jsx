@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage.jsx";
 import BasketPage from "./pages/BasketPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrdersHistoryPage from "./pages/OrdersHistoryPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 import AdminArticlesPage from "./pages/AdminArticlesPage.jsx";
 import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
 
@@ -65,6 +66,10 @@ const App = () => {
                 <Route
                     path="/orders"
                     element={authUser ? <OrdersHistoryPage /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/profile"
+                    element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
                 />
 
                 {/* Admin routes - redirect to login if not authenticated, to home if not admin */}
